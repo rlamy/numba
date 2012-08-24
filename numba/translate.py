@@ -30,7 +30,7 @@ _int32_zero = lc.Constant.int(_int32, 0)
 
 # For type-inference we need a mapping showing what the output type
 # is from any operation and the input types.  We can assume if it is
-# not in this table that the output type is the same as the input types 
+# not in this table that the output type is the same as the input types
 
 typemaps = {
 }
@@ -225,17 +225,17 @@ class _LLVMCaster(object):
                                                   *args, **kws)
         return ret_val
 
-# Variables placed on the stack. 
+# Variables placed on the stack.
 #  They allow an indirection
 #  So, that when used in an operation, the correct
-#  LLVM type can be inserted.  
+#  LLVM type can be inserted.
 class Variable(object):
     def __init__(self, val, argtyp = None, exact_typ = None):
         if isinstance(val, Variable):
             self.val = val.val
             self._llvm = val._llvm
             self.typ = val.typ
-            return 
+            return
         self.val = val
         if isinstance(val, lc.Value):
             self._llvm = val
@@ -291,7 +291,7 @@ class Variable(object):
     def is_module(self):
         return isinstance(self.val, types.ModuleType)
 
-# Add complex, unsigned, and bool 
+# Add complex, unsigned, and bool
 def str_to_llvmtype(str):
     if __debug__:
         print("str_to_llvmtype(): str = %r" % (str,))
@@ -339,7 +339,7 @@ def _dtypeish_to_str(typ):
         return ("%s%s%s" % (dt.kind, 8*dt.itemsize, "*" * n_pointer))
     except TypeError:  # already the right form
         return ("%s%s" % (typ, '*' * n_pointer))
-    
+
 
 def convert_to_llvmtype(typ):
     n_pointer = 0
@@ -417,7 +417,7 @@ def typ_isa_number(typ):
     return ret_val
 
 # Both inputs are Variable objects
-#  Resolves types on one of them. 
+#  Resolves types on one of them.
 #  Won't work if both need resolving
 # Currently delegates casting to Variable.llvm(), but only in the
 # presence of a builder instance.
@@ -479,7 +479,7 @@ def resolve_type(arg1, arg2, builder = None):
             arg1.llvm(typ, builder = builder),
             arg2.llvm(typ, builder = builder))
 
-# This won't convert any llvm types.  It assumes 
+# This won't convert any llvm types.  It assumes
 #  the llvm types in args are either fixed or not-yet specified.
 def func_resolve_type(mod, func, args):
     # already an llvm function
@@ -543,7 +543,7 @@ class _LLVMModuleUtils(object):
             ret_val = cls.__string_constants[(module, const_str)]
         else:
             lconst_str = lc.Constant.stringz(const_str)
-            ret_val = module.add_global_variable(lconst_str.type, "__STR_%d" % 
+            ret_val = module.add_global_variable(lconst_str.type, "__STR_%d" %
                                                  (len(cls.__string_constants),))
             ret_val.initializer = lconst_str
             ret_val.linkage = lc.LINKAGE_INTERNAL
@@ -863,9 +863,9 @@ class Translate(object):
 
     def setup_func(self):
         # The return type will not be known until the return
-        #   function is created.   So, we will need to 
+        #   function is created.   So, we will need to
         #   walk through the code twice....
-        #   Once to get the type of the return, and again to 
+        #   Once to get the type of the return, and again to
         #   emit the instructions.
         # For now, we assume the function has been called already
         #   or the return type is otherwise known and passed in
@@ -873,7 +873,7 @@ class Translate(object):
         # The arg_ltypes we will be able to get from what is passed in
         argnames = self.fco.co_varnames[:self.fco.co_argcount]
         self.arg_ltypes = [convert_to_llvmtype(x) for x in self.arg_types]
-        ty_func = lc.Type.function(self.ret_ltype, self.arg_ltypes)        
+        ty_func = lc.Type.function(self.ret_ltype, self.arg_ltypes)
         self.lfunc = self.mod.add_function(ty_func, self.func.func_name)
         assert isinstance(self.lfunc, lc.Function), (
             "Expected %r from llvm-py, got instance of type %r, however." %
@@ -908,7 +908,7 @@ class Translate(object):
             self.cfg.pprint()
         for i, op, arg in itercode(self.costr):
             name = opcode.opname[op]
-            # Change the builder if the line-number 
+            # Change the builder if the line-number
             # is in the list of blocks.
             if i in self.blocks.keys():
                 if i > 0:
@@ -983,7 +983,7 @@ class Translate(object):
         return res, res_typ
 
     def has_pending_phi(self, instr_index, local_index):
-        return ((instr_index in self.pending_phis) and 
+        return ((instr_index in self.pending_phis) and
                 (local_index in self.pending_phis[instr_index]))
 
     def add_pending_phi(self, instr_index, local_index, phi, pred):
@@ -1161,10 +1161,10 @@ class Translate(object):
         #    self.ee = le.ExecutionEngine.new(self.mod)
         #if name is None:
         #    name = self.func.func_name
-        #return make_ufunc(self.ee.get_pointer_to_function(self.lfunc), 
+        #return make_ufunc(self.ee.get_pointer_to_function(self.lfunc),
         #                       0, name)
 
-    # This won't convert any llvm types.  It assumes 
+    # This won't convert any llvm types.  It assumes
     #  the llvm types in args are either fixed or not-yet specified.
     def func_resolve_type(self, func, args):
         # already an llvm function
@@ -1295,7 +1295,7 @@ class Translate(object):
     def op_LOAD_CONST(self, i, op, arg):
         const = Variable(self.constants[arg])
         self.stack.append(const)
-    
+
     def op_BINARY_ADD(self, i, op, arg):
         arg2 = self.stack.pop(-1)
         arg1 = self.stack.pop(-1)
@@ -1415,7 +1415,7 @@ class Translate(object):
         func = lc.Function.intrinsic(self.mod, INTR, typs)
         res = self.builder.call(func, args)
         self.stack.append(Variable(res))
-        
+
 
     def op_RETURN_VALUE(self, i, op, arg):
         val = self.stack.pop(-1)
@@ -1436,10 +1436,10 @@ class Translate(object):
         arg1 = self.stack.pop(-1)
         typ, arg1, arg2 = resolve_type(arg1, arg2, self.builder)
         if typ[0] == 'f':
-            res = self.builder.fcmp(_compare_mapping_float[cmpop], 
+            res = self.builder.fcmp(_compare_mapping_float[cmpop],
                                     arg1, arg2)
         else: # integer FIXME: need unsigned as well...
-            res = self.builder.icmp(_compare_mapping_sint[cmpop], 
+            res = self.builder.icmp(_compare_mapping_sint[cmpop],
                                     arg1, arg2)
         self.stack.append(Variable(res))
 
